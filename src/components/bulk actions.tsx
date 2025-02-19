@@ -1,5 +1,5 @@
 import React from 'react';
-import '../styles/buttons.scss'; 
+import '../styles/bulk.scss'; 
 
 const Buttons: React.FC = () => {
     return (
