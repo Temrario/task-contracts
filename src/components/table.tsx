@@ -1,14 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Contract } from '../types';
 import '../styles/table.scss';
+import ActionMenu from './actionmenu';
 
 interface TableProps {
   contracts: Contract[];
   selectedContracts: string[];
   onSelectContract: (id: string) => void;
+  onDeleteContract: (id: string) => void;
 }
 
-const Table: React.FC<TableProps> = ({ contracts, selectedContracts, onSelectContract }) => {
+const Table: React.FC<TableProps> = ({ contracts, selectedContracts, onSelectContract, onDeleteContract }) => {
+  const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  const totalPages = Math.ceil(contracts.length / rowsPerPage);
   const allSelected = contracts.length > 0 && selectedContracts.length === contracts.length;
 
   const handleSelectAll = () => {
@@ -20,6 +27,22 @@ const Table: React.FC<TableProps> = ({ contracts, selectedContracts, onSelectCon
       });
     }
   };
+
+  const handleChangeRowsPerPage = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setRowsPerPage(Number(e.target.value));
+    setCurrentPage(1); 
+  };
+
+  const handlePrevPage = () => {
+    setCurrentPage((prev) => Math.max(prev - 1, 1));
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  };
+
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const paginatedContracts = contracts.slice(startIndex, startIndex + rowsPerPage);
 
   return (
     <div className="table-container">
@@ -40,11 +63,11 @@ const Table: React.FC<TableProps> = ({ contracts, selectedContracts, onSelectCon
             <th>Start Date</th>
             <th>End Date</th>
             <th>Status</th>
-            <th></th> {/* три крапочки*/}
+            <th></th>
           </tr>
         </thead>
         <tbody>
-          {contracts.map((contract) => (
+          {paginatedContracts.map((contract) => (
             <tr key={contract.id}>
               <td>
                 <input 
@@ -64,8 +87,23 @@ const Table: React.FC<TableProps> = ({ contracts, selectedContracts, onSelectCon
                   {contract.status}
                 </span>
               </td>
-              <td>
-                <button className="action-button">⋮</button>
+              <td className="action-cell">
+                <button 
+                  className="action-button" 
+                  onClick={() => setActiveMenu(activeMenu === contract.id ? null : contract.id)}
+                >
+                  ⋮
+                </button>
+                {activeMenu === contract.id && (
+                  <ActionMenu 
+                    onEdit={() => console.log(`Editing ${contract.id}`)} 
+                    onDelete={() => { 
+                      onDeleteContract(contract.id);
+                      setActiveMenu(null);
+                    }} 
+                    onClose={() => setActiveMenu(null)}
+                  />
+                )}
               </td>
             </tr>
           ))}
@@ -74,13 +112,17 @@ const Table: React.FC<TableProps> = ({ contracts, selectedContracts, onSelectCon
 
       {/* Пагінація */}
       <div className="pagination">
-        <button className="prev-page">{'<'}</button>
-        <span className="current-page">1</span>
-        <button className="next-page">{'>'}</button>
-        <select className="rows-per-page">
+        <button className="prev-page" onClick={handlePrevPage} disabled={currentPage === 1}>
+          {'<'}
+        </button>
+        <span className="page-number">{currentPage} / {totalPages}</span>
+        <button className="next-page" onClick={handleNextPage} disabled={currentPage === totalPages}>
+          {'>'}
+        </button>
+        <select className="rows-per-page" value={rowsPerPage} onChange={handleChangeRowsPerPage}>
+          <option value="5">5 / page</option>
           <option value="10">10 / page</option>
           <option value="20">20 / page</option>
-          <option value="50">50 / page</option>
         </select>
       </div>
     </div>

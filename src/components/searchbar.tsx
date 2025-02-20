@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import searchIcon from '../icon/search.svg';
 import '../styles/searchbar.scss';
 
+interface SearchBarProps {
+  onSearch: (query: string) => void; 
+}
+
 const useDebounce = (value: string, delay: number) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
 
@@ -18,18 +22,16 @@ const useDebounce = (value: string, delay: number) => {
   return debouncedValue;
 };
 
-const SearchBar: React.FC = () => {
+const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const debouncedSearchQuery = useDebounce(searchQuery, 500);
+  const debouncedSearchQuery = useDebounce(searchQuery, 300); 
 
   useEffect(() => {
-    if (debouncedSearchQuery) {
-      console.log('Searching for:', debouncedSearchQuery);   // виклик(доробити)
-    }
-  }, [debouncedSearchQuery]);
+    onSearch(debouncedSearchQuery); 
+  }, [debouncedSearchQuery, onSearch]);
 
   return (
-    <form className="search-bar" onSubmit={(e) => e.preventDefault()}>
+    <div className="search-bar">
       <img src={searchIcon} alt="Search" className="search-icon" />
       <input
         type="text"
@@ -38,7 +40,7 @@ const SearchBar: React.FC = () => {
         onChange={(e) => setSearchQuery(e.target.value)}
         className="search-input"
       />
-    </form>
+    </div>
   );
 };
 

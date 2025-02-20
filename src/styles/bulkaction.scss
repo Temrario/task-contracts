@@ -16,6 +16,17 @@
       &:hover {
         transform: scale(1.05);
       }
+
+      &:disabled {
+        cursor: not-allowed;
+        color: #9ca3af;
+        background-color: #f9fafb;
+        border-color: #d1d5db;
+      }
+    
+      &:hover:not(:disabled) {
+        background-color: #f3f4f6;
+      }
   
 
       &::after {

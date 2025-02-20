@@ -4,9 +4,10 @@ import '../styles/bulkaction.scss';
 interface BulkActionsProps {
   onDelete: () => void;
   onClear: () => void;
+  isDisabled: boolean; 
 }
 
-const BulkActions: React.FC<BulkActionsProps> = ({ onDelete, onClear }) => {
+const BulkActions: React.FC<BulkActionsProps> = ({ onDelete, onClear, isDisabled }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -26,6 +27,7 @@ const BulkActions: React.FC<BulkActionsProps> = ({ onDelete, onClear }) => {
       <button 
         className="bulk-actions-trigger"
         onClick={() => setIsOpen(!isOpen)}
+        disabled={isDisabled} 
       >
         Bulk Actions
       </button>

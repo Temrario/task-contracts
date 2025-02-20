@@ -12,6 +12,8 @@ import { Contract } from '../types';
 const Page1: React.FC = () => {
   const [contracts, setContracts] = useState<Contract[]>(contractsData);
   const [selectedContracts, setSelectedContracts] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+
 
   const handleSelectContract = (id: string) => {
     setSelectedContracts(prev => 
@@ -28,12 +30,22 @@ const Page1: React.FC = () => {
     setSelectedContracts([]);
   };
 
+  const handleDeleteContract = (id: string) => {
+    setContracts((prevContracts) => prevContracts.filter((contract) => contract.id !== id));
+  };
+
+  const filteredContracts = contracts.filter(contract => 
+    contract.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    contract.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    contract.number.toLowerCase().includes(searchQuery.toLowerCase()) 
+  );
+
   return (
     <div className="contracts-page">
       <Header />
       <div className="actions-container">
         <div className="top-actions">
-          <SearchBar />
+          <SearchBar onSearch={setSearchQuery} />
           <div className="right-actions">
             <AddContractButton />
             <DownloadCSVButton />
@@ -46,13 +58,15 @@ const Page1: React.FC = () => {
           <BulkActions 
             onDelete={handleBulkDelete} 
             onClear={handleClearSelection} 
+            isDisabled={selectedContracts.length === 0} 
           />
         </div>
       </div>
       <Table 
-        contracts={contracts} 
+        contracts={filteredContracts} 
         onSelectContract={handleSelectContract} 
-        selectedContracts={selectedContracts} 
+        selectedContracts={selectedContracts}
+        onDeleteContract={handleDeleteContract} 
       />
     </div>
   );
