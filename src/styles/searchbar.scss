@@ -1,11 +1,12 @@
 .search-bar {
     display: flex;
     align-items: center;
-    background: #ffff; 
+    background: transparent; 
     border-radius: 8px;
     padding: 8px 12px;
-    width: 300px;
+    width: 1000px;
     transition: all 0.2s ease-in-out;
+    border: transparent; 
   
     &:focus-within {
       background: #e5e7eb;
@@ -21,7 +22,7 @@
     .search-input {
       flex: 1;
       border: none;
-      outline: none;
+      outline: none; 
       font-size: 14px;
       background: transparent; 
       color: #374151;
@@ -31,4 +32,3 @@
       }
     }
   }
-  

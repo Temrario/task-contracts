@@ -4,15 +4,35 @@ import '../styles/table.scss';
 
 interface TableProps {
   contracts: Contract[];
+  selectedContracts: string[];
+  onSelectContract: (id: string) => void;
 }
 
-const Table: React.FC<TableProps> = ({ contracts }) => {
+const Table: React.FC<TableProps> = ({ contracts, selectedContracts, onSelectContract }) => {
+  const allSelected = contracts.length > 0 && selectedContracts.length === contracts.length;
+
+  const handleSelectAll = () => {
+    if (allSelected) {
+      contracts.forEach((contract) => onSelectContract(contract.id));
+    } else {
+      contracts.forEach((contract) => {
+        if (!selectedContracts.includes(contract.id)) onSelectContract(contract.id);
+      });
+    }
+  };
+
   return (
     <div className="table-container">
       <table className="contract-table">
         <thead>
           <tr>
-            <th><input type="checkbox" /></th>
+            <th>
+              <input 
+                type="checkbox" 
+                checked={allSelected} 
+                onChange={handleSelectAll} 
+              />
+            </th>
             <th>Contract Name</th>
             <th>Contract Number</th>
             <th>Company</th>
@@ -20,13 +40,19 @@ const Table: React.FC<TableProps> = ({ contracts }) => {
             <th>Start Date</th>
             <th>End Date</th>
             <th>Status</th>
-            <th></th>            {/* випадна кнопка */}
+            <th></th> {/* три крапочки*/}
           </tr>
         </thead>
         <tbody>
           {contracts.map((contract) => (
             <tr key={contract.id}>
-              <td><input type="checkbox" /></td>
+              <td>
+                <input 
+                  type="checkbox" 
+                  checked={selectedContracts.includes(contract.id)}
+                  onChange={() => onSelectContract(contract.id)}
+                />
+              </td>
               <td>{contract.name}</td>
               <td>{contract.number}</td>
               <td>{contract.company}</td>
@@ -46,9 +72,7 @@ const Table: React.FC<TableProps> = ({ contracts }) => {
         </tbody>
       </table>
 
-
-
-      {/* спроба типу пагінації */}
+      {/* Пагінація */}
       <div className="pagination">
         <button className="prev-page">{'<'}</button>
         <span className="current-page">1</span>

@@ -1,0 +1,67 @@
+.bulk-actions-container {
+    position: relative;
+    display: inline-block;
+  
+    .bulk-actions-trigger {
+      padding: 8px 32px 8px 16px;
+      background-color: #ffff;
+      color: black;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      position: relative;
+      transition: background-color 0.2s ease;
+  
+      &:hover {
+        transform: scale(1.05);
+      }
+  
+
+      &::after {
+        content: "▼";
+        position: absolute;
+        right: 12px;        // Стрілка ▼
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 10px;
+        opacity: 0.8;
+      }
+    }
+  
+    .dropdown-menu {
+      position: absolute;
+      top: calc(100% + 8px); 
+      left: 0;
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      z-index: 1000; 
+      min-width: 160px;
+  
+      .dropdown-item {
+        width: 100%;
+        padding: 8px 16px;
+        border: none;
+        background: transparent;
+        text-align: left;
+        cursor: pointer;
+        font-size: 14px;
+        color: #374151;
+        transition: background-color 0.2s ease;
+  
+        &:hover {
+          background-color: #f8f9fa;
+        }
+  
+        &.delete {
+          color: #dc3545;
+        }
+  
+        &.clear {
+          color: #6c757d;
+        }
+      }
+    }
+  }

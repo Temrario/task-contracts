@@ -1,14 +1,33 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Header from '../components/header';
 import SearchBar from '../components/searchbar';
-import Buttons from '../components/bulk actions';
+import BulkActions from '../components/bulk actions'; 
 import Table from '../components/table';
 import AddContractButton from '../components/addcontractBut';
 import DownloadCSVButton from '../components/csvBut';
+import SelectedCount from '../components/selectBut';
 import { contractsData } from '../data';
-
+import { Contract } from '../types';
 
 const Page1: React.FC = () => {
+  const [contracts, setContracts] = useState<Contract[]>(contractsData);
+  const [selectedContracts, setSelectedContracts] = useState<string[]>([]);
+
+  const handleSelectContract = (id: string) => {
+    setSelectedContracts(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
+  const handleBulkDelete = () => {
+    setContracts(prev => prev.filter(c => !selectedContracts.includes(c.id)));
+    setSelectedContracts([]);
+  };
+
+  const handleClearSelection = () => {
+    setSelectedContracts([]);
+  };
+
   return (
     <div className="contracts-page">
       <Header />
@@ -21,11 +40,20 @@ const Page1: React.FC = () => {
           </div>
         </div>
         <div className="bottom-actions">
-          <span className="selected-count">0 Selected</span>
-          <Buttons />
+          <SelectedCount 
+            selectedCount={selectedContracts.length} 
+          />
+          <BulkActions 
+            onDelete={handleBulkDelete} 
+            onClear={handleClearSelection} 
+          />
         </div>
       </div>
-      <Table contracts={contractsData} />
+      <Table 
+        contracts={contracts} 
+        onSelectContract={handleSelectContract} 
+        selectedContracts={selectedContracts} 
+      />
     </div>
   );
 };

@@ -3,7 +3,7 @@ export interface Contract {
     name: string;
     number: string;
     company: string;
-    type: 'Project' | 'Recurring' | 'Total';
+    type: string;
     startDate: string;
     endDate: string;
     status: 'Active' | 'Disabled' | 'Paused';

@@ -24,7 +24,7 @@ const SearchBar: React.FC = () => {
 
   useEffect(() => {
     if (debouncedSearchQuery) {
-      console.log('Searching for:', debouncedSearchQuery);   // виккли(доробити)
+      console.log('Searching for:', debouncedSearchQuery);   // виклик(доробити)
     }
   }, [debouncedSearchQuery]);
 

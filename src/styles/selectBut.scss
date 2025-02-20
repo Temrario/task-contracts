@@ -1,0 +1,32 @@
+.select-button-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+  }
+  
+  .selected-count {
+    background-color: #f3f4f6;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #111827;
+  }
+  
+  .clear-selection {
+    background: none;
+    border: none;
+    color: #3b82f6;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.2s ease-in-out;
+  
+    &:hover {
+      color: #2563eb;
+    }
+  }
+  

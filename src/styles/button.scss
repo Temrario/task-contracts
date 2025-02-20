@@ -1,0 +1,63 @@
+.actions-container {
+  padding: 16px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+
+  .top-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+
+    .right-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .add-contract-button, .download-csv-button {
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      width: 150px;
+      transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .add-contract-button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      &:hover {
+        background-color: #0056b3;
+        transform: scale(1.05);
+      }
+    }
+
+    .download-csv-button {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      &:hover {
+        background-color: #218838;
+        transform: scale(1.05);
+      }
+    }
+  }
+
+  .bottom-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .selected-count {
+      font-size: 14px;
+      color: #6c757d;
+    }
+  }
+
+  .buttons-container {
+    display: flex;
+    gap: 8px;
+  }
+}
