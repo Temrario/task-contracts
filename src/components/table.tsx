@@ -14,6 +14,8 @@ const Table: React.FC<TableProps> = ({ contracts, selectedContracts, onSelectCon
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [sortColumn, setSortColumn] = useState<keyof Contract | null>(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   const totalPages = Math.ceil(contracts.length / rowsPerPage);
   const allSelected = contracts.length > 0 && selectedContracts.length === contracts.length;
@@ -28,9 +30,56 @@ const Table: React.FC<TableProps> = ({ contracts, selectedContracts, onSelectCon
     }
   };
 
+  const handleSort = (column: keyof Contract) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
+
+  const sortedContracts = [...contracts].sort((a, b) => {
+    if (!sortColumn) return 0;
+
+    const valueA = a[sortColumn];
+    const valueB = b[sortColumn];
+
+    if (sortColumn === 'name' || sortColumn === 'company' || sortColumn === 'type') {
+      return sortDirection === 'asc'
+        ? valueA.localeCompare(valueB)
+        : valueB.localeCompare(valueA);
+    }
+
+    if (sortColumn === 'number') {
+      const numA = parseInt(valueA, 10);
+      const numB = parseInt(valueB, 10);
+      if (!isNaN(numA) && !isNaN(numB)) {
+        return sortDirection === 'asc' ? numA - numB : numB - numA;
+      }
+      return sortDirection === 'asc'
+        ? valueA.localeCompare(valueB)
+        : valueB.localeCompare(valueA);
+    }
+
+    if (sortColumn === 'startDate' || sortColumn === 'endDate') {
+      const dateA = new Date(valueA).getTime();
+      const dateB = new Date(valueB).getTime();
+      return sortDirection === 'asc' ? dateA - dateB : dateB - dateA;
+    }
+
+    if (sortColumn === 'status') {
+      return sortDirection === 'asc'
+        ? valueA === 'Active' ? -1 : 1
+        : valueA === 'Active' ? 1 : -1;
+    }
+
+    return 0;
+  });
+
   const handleChangeRowsPerPage = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setRowsPerPage(Number(e.target.value));
-    setCurrentPage(1); 
+    setCurrentPage(1);
   };
 
   const handlePrevPage = () => {
@@ -42,7 +91,7 @@ const Table: React.FC<TableProps> = ({ contracts, selectedContracts, onSelectCon
   };
 
   const startIndex = (currentPage - 1) * rowsPerPage;
-  const paginatedContracts = contracts.slice(startIndex, startIndex + rowsPerPage);
+  const paginatedContracts = sortedContracts.slice(startIndex, startIndex + rowsPerPage);
 
   return (
     <div className="table-container">
@@ -56,13 +105,34 @@ const Table: React.FC<TableProps> = ({ contracts, selectedContracts, onSelectCon
                 onChange={handleSelectAll} 
               />
             </th>
-            <th>Contract Name</th>
-            <th>Contract Number</th>
-            <th>Company</th>
-            <th>Contract Type</th>
-            <th>Start Date</th>
-            <th>End Date</th>
-            <th>Status</th>
+            <th onClick={() => handleSort('name')}>
+              Contract Name
+              <button>{sortColumn === 'name' ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅'}</button>
+            </th>
+            <th onClick={() => handleSort('number')}>
+              Contract Number
+              <button>{sortColumn === 'number' ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅'}</button>
+            </th>
+            <th onClick={() => handleSort('company')}>
+              Company
+              <button>{sortColumn === 'company' ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅'}</button>
+            </th>
+            <th onClick={() => handleSort('type')}>
+              Contract Type
+              <button>{sortColumn === 'type' ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅'}</button>
+            </th>
+            <th onClick={() => handleSort('startDate')}>
+              Start Date
+              <button>{sortColumn === 'startDate' ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅'}</button>
+            </th>
+            <th onClick={() => handleSort('endDate')}>
+              End Date
+              <button>{sortColumn === 'endDate' ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅'}</button>
+            </th>
+            <th onClick={() => handleSort('status')}>
+              Status
+              <button>{sortColumn === 'status' ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅'}</button>
+            </th>
             <th></th>
           </tr>
         </thead>
@@ -110,12 +180,11 @@ const Table: React.FC<TableProps> = ({ contracts, selectedContracts, onSelectCon
         </tbody>
       </table>
 
-      {/* Пагінація */}
       <div className="pagination">
         <button className="prev-page" onClick={handlePrevPage} disabled={currentPage === 1}>
           {'<'}
         </button>
-        <span className="page-number">{currentPage} / {totalPages}</span>
+        <span className="current-page">{currentPage}</span>
         <button className="next-page" onClick={handleNextPage} disabled={currentPage === totalPages}>
           {'>'}
         </button>

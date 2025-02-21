@@ -1,4 +1,3 @@
-// Міксини (завжди оголошуємо першими)
 @mixin reset-button {
   background: none;
   border: none;
@@ -15,7 +14,6 @@
   transition: background-color 0.2s ease;
 }
 
-// Змінні
 $border-color: #e0e0e0;
 $primary-bg: #f8f9fa;
 $button-border: #d1d5db;
@@ -79,30 +77,74 @@ $status-colors: (
 }
 
 // Стилі пагінації
+
+$pagination-border: #d1d5db;
+$pagination-bg: white;
+$pagination-color: #374151;
+$disabled-color: #9ca3af;
+$active-color: #007bff;
+
 .pagination {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: center; 
   gap: 8px;
   margin-top: 16px;
 
-  button, .page-number, .rows-per-page {
-    @include pagination-element;
-  }
-
   button {
+    width: 32px;
+    height: 32px;
+    border: 1px solid $pagination-border;
+    background: $pagination-bg;
+    border-radius: 3px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+
+    &:hover:not(:disabled) {
+      border-color: $active-color;
+      color: $active-color;
+    }
+
     &:disabled {
       cursor: default;
       color: $disabled-color;
-      background-color: lighten($disabled-color, 35%);
-    }
-
-    &:hover:not(:disabled) {
-      background-color: darken(white, 5%);
+      border-color: $pagination-border;
+      background: #f9fafb;
     }
   }
 
-  .page-number {
-    font-weight: 600;
+  .current-page {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    color: $pagination-color;
+    margin: 0 12px; 
+    border: 1px solid $pagination-border;
+    background: $pagination-bg;
+    border-color: $active-color;
+    color: $active-color;
+    border-radius: 2px;
+  }
+
+  .rows-per-page {
+    border: 1px solid $pagination-border;
+    border-radius: 6px;
+    padding: 6px 8px;
+    background: $pagination-bg;
+    color: $pagination-color;
+    cursor: pointer;
+    margin-left: 12px; 
+    font-size: 14px;
+
+    &:focus {
+      outline: none;
+      border-color: $active-color;
+    }
   }
 }
