@@ -1,14 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Contract } from '../types';
 import '../styles/table.scss';
 import ActionMenu from './actionmenu';
+import Icon from "../icon/IconPlaceholder.svg";
 
-interface TableProps {
+export interface TableProps {
   contracts: Contract[];
   selectedContracts: string[];
   onSelectContract: (id: string) => void;
   onDeleteContract: (id: string) => void;
+  onRowsPerPageChange: (newRowsPerPage: number) => void; 
+  rowsPerPage: number; 
+  currentPage: number; 
 }
+
+
+
 
 const Table: React.FC<TableProps> = ({ contracts, selectedContracts, onSelectContract, onDeleteContract }) => {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
@@ -16,6 +23,7 @@ const Table: React.FC<TableProps> = ({ contracts, selectedContracts, onSelectCon
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [sortColumn, setSortColumn] = useState<keyof Contract | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [paginatedContracts, setPaginatedContracts] = useState<Contract[]>([]);
 
   const totalPages = Math.ceil(contracts.length / rowsPerPage);
   const allSelected = contracts.length > 0 && selectedContracts.length === contracts.length;
@@ -39,43 +47,40 @@ const Table: React.FC<TableProps> = ({ contracts, selectedContracts, onSelectCon
     }
   };
 
-  const sortedContracts = [...contracts].sort((a, b) => {
-    if (!sortColumn) return 0;
+  useEffect(() => {
+    const sortedContracts = [...contracts].sort((a, b) => {
+      if (!sortColumn) return 0;
 
-    const valueA = a[sortColumn];
-    const valueB = b[sortColumn];
+      const valueA = a[sortColumn];
+      const valueB = b[sortColumn];
 
-    if (sortColumn === 'name' || sortColumn === 'company' || sortColumn === 'type') {
-      return sortDirection === 'asc'
-        ? valueA.localeCompare(valueB)
-        : valueB.localeCompare(valueA);
-    }
-
-    if (sortColumn === 'number') {
-      const numA = parseInt(valueA, 10);
-      const numB = parseInt(valueB, 10);
-      if (!isNaN(numA) && !isNaN(numB)) {
-        return sortDirection === 'asc' ? numA - numB : numB - numA;
+      if (valueA === undefined || valueB === undefined) {
+        return 0;
       }
-      return sortDirection === 'asc'
-        ? valueA.localeCompare(valueB)
-        : valueB.localeCompare(valueA);
-    }
 
-    if (sortColumn === 'startDate' || sortColumn === 'endDate') {
-      const dateA = new Date(valueA).getTime();
-      const dateB = new Date(valueB).getTime();
-      return sortDirection === 'asc' ? dateA - dateB : dateB - dateA;
-    }
+      if (typeof valueA === 'string' && typeof valueB === 'string') {
+        return sortDirection === 'asc'
+          ? valueA.localeCompare(valueB)
+          : valueB.localeCompare(valueA);
+      }
 
-    if (sortColumn === 'status') {
-      return sortDirection === 'asc'
-        ? valueA === 'Active' ? -1 : 1
-        : valueA === 'Active' ? 1 : -1;
-    }
+      if (typeof valueA === 'number' && typeof valueB === 'number') {
+        return sortDirection === 'asc' ? valueA - valueB : valueB - valueA;
+      }
 
-    return 0;
-  });
+      if (valueA instanceof Date && valueB instanceof Date) {
+        return sortDirection === 'asc'
+          ? valueA.getTime() - valueB.getTime()
+          : valueB.getTime() - valueA.getTime();
+      }
+
+      return 0;
+    });
+
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const paginated = sortedContracts.slice(startIndex, startIndex + rowsPerPage);
+    setPaginatedContracts(paginated);
+  }, [contracts, currentPage, rowsPerPage, sortColumn, sortDirection]);
 
   const handleChangeRowsPerPage = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setRowsPerPage(Number(e.target.value));
@@ -89,9 +94,6 @@ const Table: React.FC<TableProps> = ({ contracts, selectedContracts, onSelectCon
   const handleNextPage = () => {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   };
-
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const paginatedContracts = sortedContracts.slice(startIndex, startIndex + rowsPerPage);
 
   return (
     <div className="table-container">
@@ -107,31 +109,45 @@ const Table: React.FC<TableProps> = ({ contracts, selectedContracts, onSelectCon
             </th>
             <th onClick={() => handleSort('name')}>
               Contract Name
-              <button>{sortColumn === 'name' ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅'}</button>
+              <button>
+                <img src={Icon} className={sortColumn === 'name' ? (sortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc') : ''} alt="sort" />
+              </button>
             </th>
             <th onClick={() => handleSort('number')}>
               Contract Number
-              <button>{sortColumn === 'number' ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅'}</button>
+              <button>
+                <img src={Icon} className={sortColumn === 'number' ? (sortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc') : ''} alt="sort" />
+              </button>
             </th>
             <th onClick={() => handleSort('company')}>
               Company
-              <button>{sortColumn === 'company' ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅'}</button>
+              <button>
+                <img src={Icon} className={sortColumn === 'company' ? (sortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc') : ''} alt="sort" />
+              </button>
             </th>
             <th onClick={() => handleSort('type')}>
               Contract Type
-              <button>{sortColumn === 'type' ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅'}</button>
+              <button>
+                <img src={Icon} className={sortColumn === 'type' ? (sortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc') : ''} alt="sort" />
+              </button>
             </th>
             <th onClick={() => handleSort('startDate')}>
               Start Date
-              <button>{sortColumn === 'startDate' ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅'}</button>
+              <button>
+                <img src={Icon} className={sortColumn === 'startDate' ? (sortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc') : ''} alt="sort" />
+              </button>
             </th>
             <th onClick={() => handleSort('endDate')}>
               End Date
-              <button>{sortColumn === 'endDate' ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅'}</button>
+              <button>
+                <img src={Icon} className={sortColumn === 'endDate' ? (sortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc') : ''} alt="sort" />
+              </button>
             </th>
             <th onClick={() => handleSort('status')}>
               Status
-              <button>{sortColumn === 'status' ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅'}</button>
+              <button>
+                <img src={Icon} className={sortColumn === 'status' ? (sortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc') : ''} alt="sort" />
+              </button>
             </th>
             <th></th>
           </tr>
@@ -150,8 +166,8 @@ const Table: React.FC<TableProps> = ({ contracts, selectedContracts, onSelectCon
               <td>{contract.number}</td>
               <td>{contract.company}</td>
               <td>{contract.type}</td>
-              <td>{contract.startDate}</td>
-              <td>{contract.endDate}</td>
+              <td>{contract.startDate instanceof Date ? contract.startDate.toLocaleDateString() : contract.startDate}</td>
+              <td>{contract.endDate instanceof Date ? contract.endDate.toLocaleDateString() : contract.endDate}</td>
               <td>
                 <span className={`status ${contract.status.toLowerCase()}`}>
                   {contract.status}
