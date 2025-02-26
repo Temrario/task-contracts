@@ -27,7 +27,7 @@ $status-colors: (
 // Стилі таблиці
 .table-container {
   width: 100%;
-  overflow-x: auto;
+  overflow-x: none;
   margin-top: 16px;
 
   .contract-table {
