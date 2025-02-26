@@ -1,23 +1,26 @@
 import React, { useState } from 'react';
 import Header from '../components/header';
 import SearchBar from '../components/searchbar';
-import BulkActions from '../components/bulk actions'; 
+import BulkActions from '../components/bulk actions';
 import Table from '../components/table';
 import AddContractButton from '../components/addcontractBut';
 import DownloadCSVButton from '../components/csvBut';
 import SelectedCount from '../components/selectBut';
-import Modal from '../components/modal'; 
+import Modal from '../components/modal';
 import { contractsData } from '../data';
 import { Contract } from '../types';
 import { v4 as uuidv4 } from 'uuid';
+import 'react-datepicker/dist/react-datepicker.css';
+
 
 const Page1: React.FC = () => {
   const [contracts, setContracts] = useState<Contract[]>(contractsData);
   const [selectedContracts, setSelectedContracts] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentPage,] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(5); 
+  const [currentPage, setCurrentPage] = useState(1); 
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [paginatedContracts, setPaginatedContracts] = useState<Contract[]>([]);
 
   const handleCreateContract = (formData: {
     name?: string;
@@ -30,17 +33,17 @@ const Page1: React.FC = () => {
   }) => {
     const newContract: Contract = {
       id: uuidv4(),
-      name: formData.name || 'New Contract', 
+      name: formData.name || 'New Contract',
       number: formData.number,
       company: formData.company,
-      dateCreated: formData.dateCreated, 
-      startDate: formData.startDate, 
-      endDate: formData.expiryDate, 
-      status: 'Active', 
+      dateCreated: formData.dateCreated,
+      startDate: formData.startDate,
+      endDate: formData.expiryDate,
+      status: 'Active',
     };
     
     setContracts(prev => [...prev, newContract]);
-    setIsModalOpen(false); 
+    setIsModalOpen(false);
   };
 
   const handleSelectContract = (id: string) => {
@@ -65,11 +68,20 @@ const Page1: React.FC = () => {
   const filteredContracts = contracts.filter(contract => 
     contract.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     contract.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    contract.number.toLowerCase().includes(searchQuery.toLowerCase()) 
+    contract.number.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleRowsPerPageChange = (newRowsPerPage: number) => {
     setRowsPerPage(newRowsPerPage);
+    setCurrentPage(1); 
+  };
+
+  const handlePaginatedDataChange = (data: Contract[]) => {
+    setPaginatedContracts(data);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
   };
 
   return (
@@ -79,11 +91,11 @@ const Page1: React.FC = () => {
         <div className="top-actions">
           <SearchBar onSearch={setSearchQuery} />
           <div className="right-actions">
-            <AddContractButton onCreateContract={handleCreateContract} /> 
+            <AddContractButton onCreateContract={handleCreateContract} />
             <DownloadCSVButton 
-              data={contracts} 
-              rowsPerPage={rowsPerPage} 
-              currentPage={currentPage} 
+              data={paginatedContracts} 
+              rowsPerPage={rowsPerPage}
+              currentPage={currentPage}
             />
           </div>
         </div>
@@ -97,13 +109,15 @@ const Page1: React.FC = () => {
         </div>
       </div>
       <Table 
-        contracts={filteredContracts} 
-        onSelectContract={handleSelectContract} 
+        contracts={filteredContracts}
+        onSelectContract={handleSelectContract}
         selectedContracts={selectedContracts}
-        onDeleteContract={handleDeleteContract} 
-        onRowsPerPageChange={handleRowsPerPageChange} 
-        rowsPerPage={rowsPerPage} 
-        currentPage={currentPage} 
+        onDeleteContract={handleDeleteContract}
+        onRowsPerPageChange={handleRowsPerPageChange}
+        rowsPerPage={rowsPerPage}
+        currentPage={currentPage}
+        onPaginatedDataChange={handlePaginatedDataChange}
+        onPageChange={handlePageChange} 
       />
       <Modal 
         isOpen={isModalOpen} 

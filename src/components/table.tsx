@@ -9,18 +9,27 @@ export interface TableProps {
   selectedContracts: string[];
   onSelectContract: (id: string) => void;
   onDeleteContract: (id: string) => void;
-  onRowsPerPageChange: (newRowsPerPage: number) => void; 
-  rowsPerPage: number; 
-  currentPage: number; 
+  onRowsPerPageChange: (newRowsPerPage: number) => void;
+  rowsPerPage: number;
+  currentPage: number;
+  onPaginatedDataChange?: (paginatedData: Contract[]) => void;
+  onPageChange?: (newPage: number) => void; 
 }
 
-
-
-
-const Table: React.FC<TableProps> = ({ contracts, selectedContracts, onSelectContract, onDeleteContract }) => {
+const Table: React.FC<TableProps> = ({
+  contracts,
+  selectedContracts,
+  onSelectContract,
+  onDeleteContract,
+  onRowsPerPageChange,
+  rowsPerPage: parentRowsPerPage,
+  currentPage: parentCurrentPage,
+  onPaginatedDataChange,
+  onPageChange,
+}) => {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [currentPage, setCurrentPage] = useState(parentCurrentPage);
+  const [rowsPerPage, setRowsPerPage] = useState(parentRowsPerPage);
   const [sortColumn, setSortColumn] = useState<keyof Contract | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [paginatedContracts, setPaginatedContracts] = useState<Contract[]>([]);
@@ -50,49 +59,61 @@ const Table: React.FC<TableProps> = ({ contracts, selectedContracts, onSelectCon
   useEffect(() => {
     const sortedContracts = [...contracts].sort((a, b) => {
       if (!sortColumn) return 0;
-
+  
       const valueA = a[sortColumn];
       const valueB = b[sortColumn];
-
-      if (valueA === undefined || valueB === undefined) {
-        return 0;
-      }
-
+  
       if (typeof valueA === 'string' && typeof valueB === 'string') {
-        return sortDirection === 'asc'
-          ? valueA.localeCompare(valueB)
-          : valueB.localeCompare(valueA);
+        return sortDirection === 'asc' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
       }
-
+  
       if (typeof valueA === 'number' && typeof valueB === 'number') {
         return sortDirection === 'asc' ? valueA - valueB : valueB - valueA;
       }
-
+  
       if (valueA instanceof Date && valueB instanceof Date) {
-        return sortDirection === 'asc'
-          ? valueA.getTime() - valueB.getTime()
-          : valueB.getTime() - valueA.getTime();
+        return sortDirection === 'asc' ? valueA.getTime() - valueB.getTime() : valueB.getTime() - valueA.getTime();
       }
-
+  
       return 0;
     });
-
+  
     const startIndex = (currentPage - 1) * rowsPerPage;
     const paginated = sortedContracts.slice(startIndex, startIndex + rowsPerPage);
-    setPaginatedContracts(paginated);
+  
+    setPaginatedContracts((prev) => {
+      if (JSON.stringify(prev) !== JSON.stringify(paginated)) {
+        return paginated;
+      }
+      return prev;
+    });
+  
+    onPaginatedDataChange?.(paginated);
   }, [contracts, currentPage, rowsPerPage, sortColumn, sortDirection]);
+  
 
   const handleChangeRowsPerPage = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setRowsPerPage(Number(e.target.value));
+    const newRowsPerPage = Number(e.target.value);
+    setRowsPerPage(newRowsPerPage);
     setCurrentPage(1);
+    onRowsPerPageChange(newRowsPerPage);
+    if (onPageChange) onPageChange(1); 
   };
 
   const handlePrevPage = () => {
-    setCurrentPage((prev) => Math.max(prev - 1, 1));
+    setCurrentPage((prev) => {
+      const newPage = Math.max(prev - 1, 1);
+      if (onPageChange) onPageChange(newPage);
+      return newPage;
+    });
   };
 
   const handleNextPage = () => {
-    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+    setCurrentPage((prev) => {
+      const newPage = Math.min(prev + 1, totalPages);
+      if (onPageChange) onPageChange(newPage);
+      return newPage;
+    });
   };
 
   return (
